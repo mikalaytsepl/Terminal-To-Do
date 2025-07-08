@@ -14,5 +14,12 @@ jobs:
               uses: psf/black@stable
               with:
                 options: "--verbose"
+            
+            - name: commit changes made
+              uses: EndBug/add-and-commit@v9
+              with:
+                author_name: Black-lint
+                default_author: black
+                message: 'reformattng made by black lint'
 
             
