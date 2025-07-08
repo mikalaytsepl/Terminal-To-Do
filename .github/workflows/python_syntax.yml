@@ -1,0 +1,25 @@
+name: Python syntax check
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: check out repo
+              uses: actions/checkout@v4
+
+            - name: perform-black-lint-check
+              uses: psf/black@stable
+              with:
+                options: "--verbose"
+            
+            - name: commit changes made
+              uses: EndBug/add-and-commit@v9
+              with:
+                author_name: Black-lint
+                default_author: github_actions
+                message: 'reformattng made by black lint'
+
+            
