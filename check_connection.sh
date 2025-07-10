@@ -44,7 +44,7 @@ build_a_tree(){
     jsonstuff=$1
     echo "$jsonstuff" | jq -c ".[]" | while read -r element; do
         if [[ "$element" != null ]]; then
-            jq ".id" <<< "$element"
+            jq ".id, .objects_type" <<< "$element"
         fi
     done
     
