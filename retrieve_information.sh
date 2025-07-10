@@ -40,16 +40,6 @@ get_page_contents(){
     echo "$test"
 }
 
-build_a_tree(){
-    jsonstuff=$1
-    echo "$jsonstuff" | jq -c ".[]" | while read -r element; do
-        if [[ "$element" != null ]]; then
-            jq ".id, .objects_type" <<< "$element"
-        fi
-    done
-    
-}
-
 check_if_reacheable
 while getopts "pjhn" flag; do
     case $flag in
