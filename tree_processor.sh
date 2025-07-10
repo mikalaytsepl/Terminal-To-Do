@@ -22,7 +22,7 @@ build_a_tree(){
     for ((i = 0; i < ${#elements[@]}; i++)); do
         element="${elements[i]}"
         type=$(jq -r ".objects_type" <<< "$element")
-        text=$(jq -r ".plain_text" <<< "$element")
+        text=$(jq -r ".plain_text" <<< "$element") 
 
         next_type=""
         if (( i + 1 < ${#elements[@]} )); then
@@ -43,7 +43,12 @@ build_a_tree(){
                 else
                     local pipe="$L_PIPE"
                 fi
-                echo "${VERTICAL_PIPE}${current_indent}${pipe} $text"
+
+                if [[ "$(jq -r ".checked"  <<< "$element")" != "true" ]]; then
+                    echo "${VERTICAL_PIPE}${current_indent}${pipe} $text"
+                else
+                     echo -e "${VERTICAL_PIPE}${current_indent}${pipe} \e[9m$text\e[0m"
+                fi
                 ;;
             paragraph)
                 echo "${THREE_WAY_PIPE} $text"
