@@ -6,10 +6,9 @@ jobs:
     shellcheck:
         name: shell check
         runs-on: ubuntu-latest
-
-        steps: 
-            - name: checkout
-              uses: actions/checkout@v4
-
-            - name: perform check
-              run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/shellcheck/master/pipeline.sh)
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+            
+          - name: Run ShellCheck
+            uses: Azbagheri/shell-linter@latest

@@ -7,38 +7,55 @@ INDENT="    "
 
 get_name(){
     NAME="$(./retrieve_information.sh -n)"
-    echo "$NAME" | figlet -t -f smbraille # or future font, i still don't know
+    echo "$NAME" | figlet -t -f future # or smbraille font, i still don't know
 }
 get_name
 # wideterm for headings 
 
 build_a_tree(){
+    # Get JSON and turn into indexed array
     jsonstuff="$(./retrieve_information.sh -j)"
+    mapfile -t elements < <(echo "$jsonstuff" | jq -c ".[]")
+
     current_indent=""
 
-    echo "$jsonstuff" | jq -c ".[]" | while read -r element; do
-        if [[ "$element" != null ]]; then
-            type="$(jq -r ".objects_type" <<< "$element")"
-            text="$(jq -r ".plain_text" <<< "$element")"
+    for ((i = 0; i < ${#elements[@]}; i++)); do
+        element="${elements[i]}"
+        type=$(jq -r ".objects_type" <<< "$element")
+        text=$(jq -r ".plain_text" <<< "$element")
 
-            case "$type" in
-                heading_1 | heading_2 | heading_3)
-                    current_indent=""  # reset indent
-                    echo -n "$THREE_WAY_PIPE "
-                    figlet -t -f wideterm "$text"
-                    current_indent="$INDENT"  # set indent for next level
-                    ;;
-                to_do)
-                    echo "${VERTICAL_PIPE}${current_indent}${THREE_WAY_PIPE} $text"
-                    ;;
-                paragraph)
-                    echo "${THREE_WAY_PIPE} $text"
-                    ;;
-                *)
-                    echo "Unhandled object_type: $type"
-                    ;;
-            esac
+        next_type=""
+        if (( i + 1 < ${#elements[@]} )); then
+            next_type=$(jq -r ".objects_type" <<< "${elements[i + 1]}")
         fi
+
+        case "$type" in
+            heading_1 | heading_2 | heading_3)
+                current_indent=""
+                echo -n "$THREE_WAY_PIPE "
+                figlet -t -f wideterm "$text"
+                current_indent="$INDENT"
+                ;;
+            to_do)
+                # Determine if this is the last child
+                if [[ "$next_type" == "to_do" ]]; then
+                    local pipe="$THREE_WAY_PIPE"
+                else
+                    local pipe="$L_PIPE"
+                fi
+                echo "${VERTICAL_PIPE}${current_indent}${pipe} $text"
+                ;;
+            paragraph)
+                echo "${THREE_WAY_PIPE} $text"
+            ;;
+            null)
+                continue
+            ;;
+            *)
+                echo "Unhandled object_type: $type"
+                ;;
+        esac
     done
+    echo "${L_PIPE}End of the note."
 }
 build_a_tree
