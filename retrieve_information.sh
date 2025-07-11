@@ -40,8 +40,30 @@ get_page_contents(){
     echo "$test"
 }
 
+toggle_todo(){
+    
+    mapfile -t idstate < <(echo "$1")
+
+    echo "toggling the state of ${idstate[0]}"
+
+    if [[ ${idstate[1]} == true ]]; then
+        idstate[1]=false
+    else
+        idstate[1]=true
+    fi
+
+    echo "parsing with ${idstate[1]}"
+
+    curl --silent --output /dev/null \
+    -X PATCH "https://api.notion.com/v1/blocks/${idstate[0]}" \
+    -H "Authorization: Bearer $API_TOKEN" \
+    -H "Notion-Version: 2022-06-28" \
+    -H "Content-Type: application/json" \
+    --data "{\"to_do\": {\"checked\": ${idstate[1]}}}" 
+}
+
 check_if_reacheable
-while getopts "pjhn" flag; do
+while getopts "pjhnt:" flag; do
     case $flag in
 
     p)
@@ -54,6 +76,10 @@ while getopts "pjhn" flag; do
 
     n)
         get_page_name
+    ;;
+
+    t)
+        toggle_todo "$2"
     ;;
 
     ?/)
