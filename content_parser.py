@@ -18,6 +18,8 @@ def get_properties_by_id(id: str, content: dict) -> dict:
                 result["plain_text"] = objects[objects["type"]]["rich_text"][0][
                     "plain_text"
                 ].replace("\u2019", "'")
+                if result["objects_type"] == "to_do":
+                    result["checked"] = objects[objects["type"]]["checked"]
                 return result
             except IndexError:
                 return None

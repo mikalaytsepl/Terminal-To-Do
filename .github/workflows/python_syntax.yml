@@ -3,37 +3,43 @@ name: Python syntax check
 on: [push, pull_request, workflow_dispatch]
 
 permissions:
-    contents: "write"
+  contents: write
 
 jobs:
-    lint:
-        runs-on: ubuntu-latest
-        
-        steps:
-            - name: check out repo
-              uses: actions/checkout@v4
+  lint:
+    runs-on: ubuntu-latest
 
-            - name: perform-black-lint-check
-              uses: psf/black@stable
-              with:
-                options: "--verbose"
-            
-            - name: commit changes made
-              run: |
-                git config user.name "Black-lint"
-                git config user.email "github-actions[bot]@users.noreply.github.com"
-                
-                git add .
-                
-                # commit if there are chanes
-                if ! git diff --cached --quiet; then
-                git commit -m "lint: auto-format with Black"
-                git push
-                else
-                echo "No changes to commit."
-                fi
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: check out repo
+        uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"  
 
-            
+      - name: install black
+        run: pip install black
+
+      - name: run black linter
+        run: black . --verbose
+
+      - name: check if there are any changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changes detected"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR with fixes if there are any
+        if: steps.check_changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "style: auto-format with black"
+          title: "linting using black"
+          branch: lint-fixes/${{ github.run_id }}

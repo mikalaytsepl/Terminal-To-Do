@@ -1,0 +1,14 @@
+name: workflow to analyze and fix bash part of the project
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+    shellcheck:
+        name: shell check
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+            
+          - name: Run ShellCheck
+            uses: Azbagheri/shell-linter@latest
