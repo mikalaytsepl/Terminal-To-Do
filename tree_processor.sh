@@ -4,6 +4,7 @@ VERTICAL_PIPE="│"
 THREE_WAY_PIPE="├──"
 L_PIPE="└──"
 INDENT="    "
+LINE_NUMBERS=false
 
 get_name(){
     NAME="$(./retrieve_information.sh -n)"
@@ -19,6 +20,8 @@ build_a_tree(){
     current_indent=""
 
     for ((i = 0; i < ${#elements[@]}; i++)); do
+        # set -x  
+        
         element="${elements[i]}"
         type=$(jq -r ".objects_type" <<< "$element")
         text=$(jq -r ".plain_text" <<< "$element") 
@@ -26,6 +29,32 @@ build_a_tree(){
         next_type=""
         if (( i + 1 < ${#elements[@]} )); then
             next_type=$(jq -r ".objects_type" <<< "${elements[i + 1]}")
+        fi
+
+        # calculation of the spacing of indexes, for numbers not to disrupt the 
+        # look of the tree
+        ARRLEN=${#elements[@]}
+
+        # Last index
+        LAST_INDEX=$(( ARRLEN - 1 ))
+
+        # Get number of digits in the highest index
+        DIGITS=${#LAST_INDEX}
+        
+        COUNT=$(( DIGITS - ${#i} ))
+        NUM_SPACING=""
+        for _ in $(seq 1 $COUNT); do
+            NUM_SPACING+=" "
+        done
+
+        if [[ "$type" != "null" && $LINE_NUMBERS = true ]]; then
+
+            if (( i <= 9)); then
+                echo -n "${i}${NUM_SPACING}"
+            else
+                echo -n "${i}${NUM_SPACING}"
+            fi
+
         fi
 
         case "$type" in
@@ -59,8 +88,18 @@ build_a_tree(){
                 echo "Unhandled object_type: $type"
                 ;;
         esac
+        # set +x
     done
-    echo "${L_PIPE}End of the note."
+
+    FINAL_INDEX=$(( ${#elements[@]} - 1 ))
+    COUNT=$(( ${#FINAL_INDEX} ))
+    NUM_SPACING=""
+    for _ in $(seq 1 $COUNT); do
+        NUM_SPACING+=" "
+    done
+
+    # Print the final tree end line with correct indent
+    echo "${NUM_SPACING}${L_PIPE}End of the note."
 }
 
 prepare_for_toggle(){
@@ -79,7 +118,7 @@ prepare_for_toggle(){
     
 }
 
-while getopts "bt:" flag; do
+while getopts "bt:n" flag; do
     case $flag in 
 
     b)
@@ -88,13 +127,16 @@ while getopts "bt:" flag; do
 
     t)
         if ! result=$(prepare_for_toggle "$2"); then
-            echo "Toggle aborted: Not a to-do block" >&2
+            echo "Toggle aborted: not a to-do block" >&2
             exit 1
         fi
 
         ./retrieve_information.sh -t "$result"
     ;;
-
+    n)
+        LINE_NUMBERS=true
+        build_a_tree
+    ;;
     ?/)
         echo "no valid option found"
     ;;

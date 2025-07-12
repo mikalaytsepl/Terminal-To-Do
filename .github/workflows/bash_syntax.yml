@@ -12,3 +12,5 @@ jobs:
             
           - name: Run ShellCheck
             uses: Azbagheri/shell-linter@latest
+            with:
+              exclude-paths: "LICENSE"

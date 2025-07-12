@@ -44,15 +44,16 @@ toggle_todo(){
     
     mapfile -t idstate < <(echo "$1")
 
-    echo "toggling the state of ${idstate[0]}"
-
     if [[ ${idstate[1]} == true ]]; then
         idstate[1]=false
+        idstate[2]="not crossed"
     else
         idstate[1]=true
+        idstate[2]="crossed"
     fi
 
-    echo "parsing with ${idstate[1]}"
+
+    echo "toggling the state of ${idstate[0]} to ${idstate[2]}"
 
     curl --silent --output /dev/null \
     -X PATCH "https://api.notion.com/v1/blocks/${idstate[0]}" \
