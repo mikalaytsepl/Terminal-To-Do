@@ -63,8 +63,21 @@ toggle_todo(){
     --data "{\"to_do\": {\"checked\": ${idstate[1]}}}" 
 }
 
+
+delete_by_id(){
+    
+    local WHATTODELETE=$1
+
+    echo "the block with ${WHATTODELETE[0]} id has been moved to trash"
+
+    curl --silent --output /dev/null \
+    -X DELETE "https://api.notion.com/v1/blocks/${WHATTODELETE}" \
+    -H 'Authorization: Bearer '"$API_TOKEN"'' \
+    -H 'Notion-Version: 2022-06-28'
+}
+
 check_if_reacheable
-while getopts "pjhnt:" flag; do
+while getopts "pjhnt:d" flag; do
     case $flag in
 
     p)
@@ -82,7 +95,9 @@ while getopts "pjhnt:" flag; do
     t)
         toggle_todo "$2"
     ;;
-
+    d)
+        delete_by_id "$2"
+    ;;
     ?/)
         echo "no valid option found"
     ;;

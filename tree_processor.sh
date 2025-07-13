@@ -47,14 +47,8 @@ build_a_tree(){
             NUM_SPACING+=" "
         done
 
-        if [[ "$type" != "null" && $LINE_NUMBERS = true ]]; then
-
-            if (( i <= 9)); then
-                echo -n "${i}${NUM_SPACING}"
-            else
-                echo -n "${i}${NUM_SPACING}"
-            fi
-
+        if [[ $LINE_NUMBERS = true ]]; then
+            echo -n "${i}${NUM_SPACING}"
         fi
 
         case "$type" in
@@ -82,7 +76,7 @@ build_a_tree(){
                 echo "${THREE_WAY_PIPE} $text"
             ;;
             null)
-                continue
+                echo "${VERTICAL_PIPE}${current_indent}"
             ;;
             *)
                 echo "Unhandled object_type: $type"
@@ -91,14 +85,17 @@ build_a_tree(){
         # set +x
     done
 
-    FINAL_INDEX=$(( ${#elements[@]} - 1 ))
-    COUNT=$(( ${#FINAL_INDEX} ))
-    NUM_SPACING=""
-    for _ in $(seq 1 $COUNT); do
-        NUM_SPACING+=" "
-    done
 
-    # Print the final tree end line with correct indent
+    # correct indent for the end of the tree thingy
+    NUM_SPACING=""
+    if [[ $LINE_NUMBERS = true ]]; then
+            FINAL_INDEX=$(( ${#elements[@]} - 1 ))
+            COUNT=$(( ${#FINAL_INDEX} ))
+            for _ in $(seq 1 $COUNT); do
+                NUM_SPACING+=" "
+            done
+    fi
+
     echo "${NUM_SPACING}${L_PIPE}End of the note."
 }
 
@@ -118,7 +115,22 @@ prepare_for_toggle(){
     
 }
 
-while getopts "bt:n" flag; do
+prepare_for_deletion(){
+    local index=$1
+
+    #avoid deleting 0 element if index was not set
+    if [[ $index == "" ]]; then
+        echo "error: the index was not explicitly specified"
+        exit 1
+    fi
+
+    jsonstuff="$(./retrieve_information.sh -j)"
+    mapfile -t elements < <(echo "$jsonstuff" | jq -c ".[]")
+    jq -r ".id" <<< "${elements[$index]}"
+
+}
+
+while getopts "bt:nd" flag; do
     case $flag in 
 
     b)
@@ -137,7 +149,15 @@ while getopts "bt:n" flag; do
         LINE_NUMBERS=true
         build_a_tree
     ;;
-    ?/)
+    d)
+        prepare_for_deletion "$2"
+        if ! result=$(prepare_for_deletion "$2"); then
+            echo "Deletion failed: on index specified"
+            exit 1
+        fi
+        ./retrieve_information.sh -d "$result"
+    ;;
+    *)
         echo "no valid option found"
     ;;
     esac
