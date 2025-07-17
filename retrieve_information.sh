@@ -44,15 +44,16 @@ toggle_todo(){
     
     mapfile -t idstate < <(echo "$1")
 
-    echo "toggling the state of ${idstate[0]}"
-
     if [[ ${idstate[1]} == true ]]; then
         idstate[1]=false
+        idstate[2]="not crossed"
     else
         idstate[1]=true
+        idstate[2]="crossed"
     fi
 
-    echo "parsing with ${idstate[1]}"
+
+    echo "toggling the state of ${idstate[0]} to ${idstate[2]}"
 
     curl --silent --output /dev/null \
     -X PATCH "https://api.notion.com/v1/blocks/${idstate[0]}" \
@@ -62,8 +63,31 @@ toggle_todo(){
     --data "{\"to_do\": {\"checked\": ${idstate[1]}}}" 
 }
 
+
+delete_by_id(){
+    
+    local WHATTODELETE=$1
+
+    echo "the block with ${WHATTODELETE[0]} id has been moved to trash"
+
+    curl --silent --output /dev/null \
+    -X DELETE "https://api.notion.com/v1/blocks/${WHATTODELETE}" \
+    -H 'Authorization: Bearer '"$API_TOKEN"'' \
+    -H 'Notion-Version: 2022-06-28'
+}
+
+get_item_children(){
+    local PARENT_ID=$1
+    childrenlist="$(curl --silent \
+                    "https://api.notion.com/v1/blocks/${PARENT_ID}/children?page_size=100" \
+                    -H 'Authorization: Bearer '"$API_TOKEN"'' \
+                    -H "Notion-Version: 2022-06-28" | python3.11 content_parser.py "$2")"
+    echo "$childrenlist"
+
+}
+
 check_if_reacheable
-while getopts "pjhnt:" flag; do
+while getopts "pjhnt:dc" flag; do
     case $flag in
 
     p)
@@ -82,6 +106,14 @@ while getopts "pjhnt:" flag; do
         toggle_todo "$2"
     ;;
 
+    d)
+        delete_by_id "$2"
+    ;;
+
+    c)
+        get_item_children "$2" "--json"
+    ;;
+    
     ?/)
         echo "no valid option found"
     ;;
