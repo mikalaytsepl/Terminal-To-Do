@@ -20,6 +20,7 @@ def get_properties_by_id(id: str, content: dict) -> dict:
                 ].replace("\u2019", "'")
                 if result["objects_type"] == "to_do":
                     result["checked"] = objects[objects["type"]]["checked"]
+                result["has_children"] = objects["has_children"]
                 return result
             except IndexError:
                 return None
@@ -27,8 +28,11 @@ def get_properties_by_id(id: str, content: dict) -> dict:
 
 def parser(path: str) -> dict:
     content = json.loads(path)
-    block_ids = [block["id"] for block in content["results"]]
-    parsed = [get_properties_by_id(id, content) for id in block_ids]
+    try:
+        block_ids = [block["id"] for block in content["results"]]
+        parsed = [get_properties_by_id(id, content) for id in block_ids]
+    except KeyError:
+        print(content)
     return parsed
 
 

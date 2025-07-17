@@ -76,8 +76,18 @@ delete_by_id(){
     -H 'Notion-Version: 2022-06-28'
 }
 
+get_item_children(){
+    local PARENT_ID=$1
+    childrenlist="$(curl --silent \
+                    "https://api.notion.com/v1/blocks/${PARENT_ID}/children?page_size=100" \
+                    -H 'Authorization: Bearer '"$API_TOKEN"'' \
+                    -H "Notion-Version: 2022-06-28" | python3.11 content_parser.py "$2")"
+    echo "$childrenlist"
+
+}
+
 check_if_reacheable
-while getopts "pjhnt:d" flag; do
+while getopts "pjhnt:dc" flag; do
     case $flag in
 
     p)
@@ -95,9 +105,15 @@ while getopts "pjhnt:d" flag; do
     t)
         toggle_todo "$2"
     ;;
+
     d)
         delete_by_id "$2"
     ;;
+
+    c)
+        get_item_children "$2" "--json"
+    ;;
+    
     ?/)
         echo "no valid option found"
     ;;

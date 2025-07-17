@@ -12,12 +12,15 @@ get_name(){
 }
 
 build_a_tree(){
-    get_name
+    # set -x 
     # Get JSON and turn into indexed array
-    jsonstuff="$(./retrieve_information.sh -j)"
+    # "$(./retrieve_information.sh -j)"
+    local depth=${4:-0} 
+
+    jsonstuff=$1
     mapfile -t elements < <(echo "$jsonstuff" | jq -c ".[]")
 
-    current_indent=""
+    current_indent="$2"
 
     for ((i = 0; i < ${#elements[@]}; i++)); do
         # set -x  
@@ -59,17 +62,21 @@ build_a_tree(){
                 current_indent="$INDENT"
                 ;;
             to_do)
-                # Determine if this is the last child
+                # Determine if this is the last element
                 if [[ "$next_type" == "to_do" ]]; then
                     local pipe="$THREE_WAY_PIPE"
                 else
                     local pipe="$L_PIPE"
                 fi
-
                 if [[ "$(jq -r ".checked"  <<< "$element")" != "true" ]]; then
                     echo "${VERTICAL_PIPE}${current_indent}${pipe} $text"
                 else
                      echo -e "${VERTICAL_PIPE}${current_indent}${pipe} \e[9m$text\e[0m"
+                fi
+                
+                #checking whether the element has children 
+                if [[ "$(jq -r ".has_children"  <<< "$element")" == "true" ]]; then 
+                    build_a_tree "$(./retrieve_information.sh -c "$(jq -r ".id" <<< "$element")")" "$current_indent " "true" $((depth + 1)) #manually adding a spacing to the indent
                 fi
                 ;;
             paragraph)
@@ -86,17 +93,22 @@ build_a_tree(){
     done
 
 
-    # correct indent for the end of the tree thingy
-    NUM_SPACING=""
-    if [[ $LINE_NUMBERS = true ]]; then
-            FINAL_INDEX=$(( ${#elements[@]} - 1 ))
-            COUNT=$(( ${#FINAL_INDEX} ))
-            for _ in $(seq 1 $COUNT); do
-                NUM_SPACING+=" "
-            done
-    fi
+    if [[ "$3" == "false"  ]]; then
+        # correct indent for the end of the tree thingy
+        NUM_SPACING=""
+        if [[ $LINE_NUMBERS = true ]]; then
+                FINAL_INDEX=$(( ${#elements[@]} - 1 ))
+                COUNT=$(( ${#FINAL_INDEX} ))
+                for _ in $(seq 1 $COUNT); do
+                    NUM_SPACING+=" "
+                done
+        fi
 
-    echo "${NUM_SPACING}${L_PIPE}End of the note."
+        echo "${NUM_SPACING}${L_PIPE}End of the note."
+        return
+    fi
+    return
+    
 }
 
 prepare_for_toggle(){
@@ -134,7 +146,8 @@ while getopts "bt:nd" flag; do
     case $flag in 
 
     b)
-        build_a_tree
+        get_name
+        build_a_tree "$(./retrieve_information.sh -j)" "" "false" 0
     ;;
 
     t)
@@ -147,7 +160,8 @@ while getopts "bt:nd" flag; do
     ;;
     n)
         LINE_NUMBERS=true
-        build_a_tree
+        get_name
+        build_a_tree "$(./retrieve_information.sh -j)" "" "false" 0
     ;;
     d)
         prepare_for_deletion "$2"
