@@ -30,7 +30,7 @@ check_if_reacheable(){
 get_page_name(){
     curl --silent "https://api.notion.com/v1/pages/$PAGE_ID"\
                             -H 'Authorization: Bearer '"$API_TOKEN"''\
-                            -H "Notion-Version: 2022-06-28" | python3.11 test_parser.py
+                            -H "Notion-Version: 2022-06-28" | python3.11 content_parser.py --name
 }
 
 get_page_contents(){

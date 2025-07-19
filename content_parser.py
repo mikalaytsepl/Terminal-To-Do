@@ -35,7 +35,11 @@ def parser(path: str) -> dict:
         print(content)
     return parsed
 
+def get_name(path:str)->str:
+    content=json.loads(path)
+    return content["properties"]["title"]["title"][0]["plain_text"]
 
+    
 def get_plain(reply) -> list:
     data = []
     for parsed_block in parser(reply):
@@ -57,5 +61,7 @@ if __name__ == "__main__":
             print(get_plain(json_reply))
         case "--json":
             print(get_json(json_reply))
+        case "--name":
+            print(get_name(json_reply))
         case _:
             print("cos sie zjebalo")
