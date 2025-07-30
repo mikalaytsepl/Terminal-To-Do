@@ -1,17 +1,34 @@
-import sys
+import sys, os
 import json
 import subprocess as sub
 
-path_to_retrieval = "./retrieve_information.sh"
+API_INTEGRATION = f"{os.getenv('HOME')}/TerminalToDo/retrieve_information.sh"
 
-result = sub.run([path_to_retrieval, "-j"], capture_output=True, text=True)
+def get_name()->dict:
+    raw_name = sub.run([API_INTEGRATION, "-n"], capture_output=True, text=True)
+    dict_pair = {"page_name": raw_name.stdout.strip()}
+    return dict_pair
+
+def has_chidlren(main_page_element:dict)->bool:
+    return main_page_element['has_children'] 
 
 
-parsed_output = json.loads(result.stdout)
+def get_page_json():
+    retr_result = sub.run([API_INTEGRATION, "-j"], capture_output=True, text=True)
+    parsed_output = json.loads(retr_result.stdout)
+    for element in parsed_output:
+        if has_chidlren(element):
+            got_children = sub.run([API_INTEGRATION, "-c", element['id']], capture_output=True, text=True)
+            parsed_children = json.loads(got_children.stdout)
+            element['children_contents']=parsed_children
+    return parsed_output
+
+def create_json_file():
+    contents = get_page_json()
+    name = get_name()
+    with open("last_known_state.json","w+") as file:
+        file.write(json.dumps(name,indent=6))
+        file.write(json.dumps(contents,indent=6))
 
 
-with open("writetest.json", "w") as file:
-    json.dump(parsed_output, file, indent=4)
-
-print("STDOUT:")
-print(result.stdout)
+create_json_file()
