@@ -21,13 +21,16 @@ def get_page_json():
             got_children = sub.run([API_INTEGRATION, "-c", element['id']], capture_output=True, text=True)
             parsed_children = json.loads(got_children.stdout)
             element['children_contents']=parsed_children
+
+    name = get_name()
+    parsed_output.insert(0, name)
+
     return parsed_output
 
 def create_json_file():
     contents = get_page_json()
-    name = get_name()
+
     with open("last_known_state.json","w+") as file:
-        file.write(json.dumps(name,indent=6))
         file.write(json.dumps(contents,indent=6))
 
 
