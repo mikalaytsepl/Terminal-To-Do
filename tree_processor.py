@@ -16,14 +16,15 @@ with open(PATH_TO_JSON,"r") as jsonfile:
 
 
 def display_name():
-    print(pyfiglet.figlet_format(page_data[0].get('page_name'), font = "future"))
+    print(pyfiglet.figlet_format(page_data[0].get('page_name'), font = "ansi_shadow"))
     
     
 
-#display_name()
-
+display_name()
+'''
 lotsoffonts = sub.run(["pyfiglet","-l"], capture_output=True, text=True)
 parsed = lotsoffonts.stdout.split('\n')
-for fontt in range(0,20):
+for fontt in range(20,40):
     print(parsed[fontt])
     print(pyfiglet.figlet_format("Test", font=parsed[fontt]))
+    '''
