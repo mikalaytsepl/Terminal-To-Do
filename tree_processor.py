@@ -20,11 +20,12 @@ def display_name():
     
     
 
-display_name()
-'''
+#display_name()
+
 lotsoffonts = sub.run(["pyfiglet","-l"], capture_output=True, text=True)
 parsed = lotsoffonts.stdout.split('\n')
-for fontt in range(20,40):
-    print(parsed[fontt])
-    print(pyfiglet.figlet_format("Test", font=parsed[fontt]))
-    '''
+for fontt in range(100,150):
+    if 'small' in parsed[fontt]:
+        print(parsed[fontt])
+        print(pyfiglet.figlet_format("Test", font=parsed[fontt]))
+# big for the smaller text sizes perhaps?  broadway_kb calvin_s cyberlarge

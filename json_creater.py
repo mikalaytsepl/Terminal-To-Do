@@ -5,16 +5,29 @@ import subprocess as sub
 API_INTEGRATION = f"{os.getenv('HOME')}/TerminalToDo/retrieve_information.sh"
 
 def get_name()->dict:
-    raw_name = sub.run([API_INTEGRATION, "-n"], capture_output=True, text=True)
-    dict_pair = {"page_name": raw_name.stdout.strip()}
-    return dict_pair
+    try:
+        raw_name = sub.run([API_INTEGRATION, "-n"],
+                            capture_output=True,
+                            text=True,
+                            check=True
+                            )
+        dict_pair = {"page_name": raw_name.stdout.strip()}
+        return dict_pair
+    except sub.CalledProcessError:
+        sys.stdout.write("Notion API call was not successfull, the last known state of the note will be displayed.") # make some signal logic or whatnot or make and aggregator
+        # so that thing will not really interract with tree processor on it's own. 
+    
 
 def has_chidlren(main_page_element:dict)->bool:
     return main_page_element['has_children'] 
 
 
 def get_page_json():
-    retr_result = sub.run([API_INTEGRATION, "-j"], capture_output=True, text=True)
+    retr_result = sub.run([API_INTEGRATION, "-j"],
+                           capture_output=True,
+                           text=True,
+                           check=True
+                            )
     parsed_output = json.loads(retr_result.stdout)
     for element in parsed_output:
         if has_chidlren(element):

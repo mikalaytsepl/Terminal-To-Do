@@ -23,7 +23,7 @@ check_if_reacheable(){
     if [[ "$( echo "$GET_PAGES_ENDPOINT" | grep -Po  "(?<=HTTP/2 )[0-9]{3}")" = "200" ]]; then
         return
     else
-        echo "couldn't reach the endpoint"
+        return 0
     fi
 }
 
