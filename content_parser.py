@@ -17,8 +17,9 @@ def get_properties_by_id(id: str, content: dict) -> dict:
             try:
                 result["id"] = objects["id"]
                 result["objects_type"] = objects["type"]
-                result["plain_text"] = objects[objects["type"]]
-                ["rich_text"][0]["plain_text"].replace("\u2019", "'")
+                result["plain_text"] = objects[objects["type"]]["rich_text"][0][
+                    "plain_text"
+                ].replace("\u2019", "'")
                 if result["objects_type"] == "to_do":
                     result["checked"] = objects[objects["type"]]["checked"]
                 result["has_children"] = objects["has_children"]
