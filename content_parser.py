@@ -2,7 +2,9 @@ import sys
 import json
 
 
-# get contents of the json file, this one maybe will be actually used that way cause we would haveto store the last known state '''
+# get contents of the json file, this one
+#  maybe will be actually used that way
+#  cause we would haveto store the last known state
 def get_json_contents(path: str) -> dict:
     with open(path, "r") as pagecontent:
         return json.load(pagecontent)
@@ -15,9 +17,8 @@ def get_properties_by_id(id: str, content: dict) -> dict:
             try:
                 result["id"] = objects["id"]
                 result["objects_type"] = objects["type"]
-                result["plain_text"] = objects[objects["type"]]["rich_text"][0][
-                    "plain_text"
-                ].replace("\u2019", "'")
+                result["plain_text"] = objects[objects["type"]]
+                ["rich_text"][0]["plain_text"].replace("\u2019", "'")
                 if result["objects_type"] == "to_do":
                     result["checked"] = objects[objects["type"]]["checked"]
                 result["has_children"] = objects["has_children"]
@@ -31,15 +32,17 @@ def parser(path: str) -> dict:
     try:
         block_ids = [block["id"] for block in content["results"]]
         parsed = [get_properties_by_id(id, content) for id in block_ids]
-    except KeyError:
-        print(content)
-    return parsed
+        return parsed
 
-def get_name(path:str)->str:
-    content=json.loads(path)
+    except KeyError:
+        print(f" that's the content{content}")
+
+
+def get_name(path: str) -> str:
+    content = json.loads(path)
     return content["properties"]["title"]["title"][0]["plain_text"]
 
-    
+
 def get_plain(reply) -> list:
     data = []
     for parsed_block in parser(reply):
@@ -64,4 +67,4 @@ if __name__ == "__main__":
         case "--name":
             print(get_name(json_reply))
         case _:
-            print("cos sie zjebalo")
+            print("something went wrong")

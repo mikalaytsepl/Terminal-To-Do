@@ -15,12 +15,12 @@ build_a_tree(){
     # set -x 
     # Get JSON and turn into indexed array
     # "$(./retrieve_information.sh -j)"
+
     local depth=${4:-0} 
 
     jsonstuff=$1
+    
     mapfile -t elements < <(echo "$jsonstuff" | jq -c ".[]")
-
-    current_indent="$2"
 
     for ((i = 0; i < ${#elements[@]}; i++)); do
         # set -x  

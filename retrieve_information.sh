@@ -23,7 +23,7 @@ check_if_reacheable(){
     if [[ "$( echo "$GET_PAGES_ENDPOINT" | grep -Po  "(?<=HTTP/2 )[0-9]{3}")" = "200" ]]; then
         return
     else
-        return 0
+        return 1 # returning non-zero exit code in bash so it will be noticeable from the outside with check true in a subprocess
     fi
 }
 
