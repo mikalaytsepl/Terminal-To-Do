@@ -1,23 +1,36 @@
 # import sys
 import os
+import sys
 import json
-
-# import subprocess as sub
+import json_creator
 import pyfiglet
 
 # import termcolor
 
-VERTICAL_PIPE = "│"
-THREE_WAY_PIPE = "├──"
-L_PIPE = "└──"
-INDENT = "    "
+
+API_INTEGRATION = f"{os.getenv('HOME')}/TerminalToDo/retrieve_information.sh"
 PATH_TO_JSON = f"{os.getenv('HOME')}/TerminalToDo/last_known_state.json"
 
-# get access check fuction and if there's access,
-#  get new state automatically b4 proceiding
-# doing some strange long ass comentaries and some
-#  formatiing mistakes to check if linters are working,
-#  ofc should delete that one in the future
+
+class TreeBuilder:
+    _VERTICAL_PIPE = "│"
+    _THREE_WAY_PIPE = "├──"
+    _L_PIPE = "└──"
+    _INDENT = "    "
+
+    def __init__(self, API_INT, JSONPATH):
+        self._API_INTEGRATION = API_INT
+        self._PATH_TO_JSON = JSONPATH
+
+    # this method will check if API is reacheable and
+    # will try to refresh the last known state if possible
+    def _check_and_refresh(self):
+        if json_creator.JSONCreator.check_connection():
+            json_creator.JSONCreator.run()  # refresh the json by prompting the API
+        else:
+            sys.stdout.write("somethng went wrong")
+
+
 with open(PATH_TO_JSON, "r") as jsonfile:
     page_data = json.load(jsonfile)
 
@@ -28,7 +41,5 @@ def display_name():
           (page_data[0].get("page_name"), font="ansi_shadow"))
     # fmt: on
 
-
-display_name()
 
 # big for the smaller text sizes perhaps?  broadway_kb calvin_s cyberlarge

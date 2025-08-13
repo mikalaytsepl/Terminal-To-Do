@@ -87,7 +87,7 @@ get_item_children(){
 }
 
 check_if_reacheable
-while getopts "pjhnt:dc" flag; do
+while getopts "pjhnt:dcr" flag; do
     case $flag in
 
     p)
@@ -112,6 +112,10 @@ while getopts "pjhnt:dc" flag; do
 
     c)
         get_item_children "$2" "--json"
+    ;;
+    
+    r)
+        check_if_reacheable
     ;;
     
     ?/)

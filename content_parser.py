@@ -2,9 +2,6 @@ import sys
 import json
 
 
-# get contents of the json file, this one
-#  maybe will be actually used that way
-#  cause we would haveto store the last known state
 def get_json_contents(path: str) -> dict:
     with open(path, "r") as pagecontent:
         return json.load(pagecontent)
