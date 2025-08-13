@@ -1,9 +1,9 @@
-# import sys
 import os
 import sys
 import json
 import json_creator
-import pyfiglet
+
+# import pyfiglet
 
 # import termcolor
 
@@ -22,6 +22,9 @@ class TreeBuilder:
         self._API_INTEGRATION = API_INT
         self._PATH_TO_JSON = JSONPATH
 
+        with open(PATH_TO_JSON, "r") as jsonfile:
+            self.page_data = json.load(jsonfile)
+
     # this method will check if API is reacheable and
     # will try to refresh the last known state if possible
     def _check_and_refresh(self):
@@ -30,16 +33,20 @@ class TreeBuilder:
         else:
             sys.stdout.write("somethng went wrong")
 
+    def _get_name(self) -> str:
+        return self.page_data[0].get("page_name")
 
-with open(PATH_TO_JSON, "r") as jsonfile:
-    page_data = json.load(jsonfile)
 
-
+"""
 def display_name():
     # fmt: off
     print(pyfiglet.figlet_format
           (page_data[0].get("page_name"), font="ansi_shadow"))
-    # fmt: on
+    # fmt: on"""
 
 
 # big for the smaller text sizes perhaps?  broadway_kb calvin_s cyberlarge
+
+
+if __name__ == "__main__":
+    print(TreeBuilder(API_INTEGRATION, PATH_TO_JSON)._get_name())
