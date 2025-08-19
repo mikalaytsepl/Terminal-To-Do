@@ -3,7 +3,7 @@ import sys
 import json
 import json_creator
 
-# import pyfiglet
+import pyfiglet
 
 # import termcolor
 
@@ -28,25 +28,23 @@ class TreeBuilder:
     # this method will check if API is reacheable and
     # will try to refresh the last known state if possible
     def _check_and_refresh(self):
-        if json_creator.JSONCreator.check_connection():
-            json_creator.JSONCreator.run()  # refresh the json by prompting the API
+        if json_creator.JSONCreator().check_connection():
+            json_creator.JSONCreator().update_json()  # refresh the json by prompting the API
         else:
             sys.stdout.write("somethng went wrong")
 
     def _get_name(self) -> str:
         return self.page_data[0].get("page_name")
 
-
-"""
-def display_name():
-    # fmt: off
-    print(pyfiglet.figlet_format
-          (page_data[0].get("page_name"), font="ansi_shadow"))
-    # fmt: on"""
+    def build_tree(self):
+        self._check_and_refresh()
+        print(
+            pyfiglet.figlet_format(self._get_name(), "calvin_s")
+        )  # something is wrong with that filget so figure that out later
 
 
 # big for the smaller text sizes perhaps?  broadway_kb calvin_s cyberlarge
 
 
 if __name__ == "__main__":
-    print(TreeBuilder(API_INTEGRATION, PATH_TO_JSON)._get_name())
+    TreeBuilder(API_INTEGRATION, PATH_TO_JSON).build_tree()

@@ -24,7 +24,7 @@ class JSONCreator:
     def _has_children(main_page_element: dict) -> bool:
         return main_page_element["has_children"]
 
-    def check_connection(self):
+    def check_connection(self) -> bool:
         try:
             sub.run([self.api_script, "-n"], check=True, text=True, capture_output=True)
             return True
