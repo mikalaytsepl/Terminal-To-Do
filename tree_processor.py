@@ -58,7 +58,7 @@ class TreeBuilder:
 
             if obj_type in ("heading_1", "heading_2", "heading_3"):
                 sys.stdout.write(f"{self._THREE_WAY_PIPE} ")
-                sys.stdout.write(pyfiglet.figlet_format(text, font="mini", width=100))
+                sys.stdout.write(f"\033[1m{text}\033[0m\n")
                 current_indent = self._INDENT
 
             elif obj_type == "to_do":
