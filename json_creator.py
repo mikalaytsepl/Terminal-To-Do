@@ -22,7 +22,10 @@ class JSONCreator:
 
     @staticmethod
     def _has_children(main_page_element: dict) -> bool:
-        return main_page_element["has_children"]
+        try:
+            return main_page_element["has_children"]
+        except TypeError:
+            return False
 
     def check_connection(self) -> bool:
         try:
@@ -36,7 +39,9 @@ class JSONCreator:
             [self.api_script, "-j"], capture_output=True, text=True, check=True
         )
         parsed_output = json.loads(retr_result.stdout)
-        for element in parsed_output:
+        for idx, element in enumerate(parsed_output):
+            if element is None:
+                parsed_output.pop(idx)
             if self._has_children(element):
                 got_children = sub.run(
                     [self.api_script, "-c", element["id"]],
